@@ -1,0 +1,121 @@
+---
+title: "Assignmnet_3"
+output: 
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+
+
+library(readr)
+
+universalbank <- read_csv("C:/Users/Dell/Desktop/universalbank.csv")
+View(universalbank)
+summary(universalbank) 
+universalbank$personal.loan<- as.factor(universalbank$personal.loan)
+universalbank$Online <-as.factor(universalbank$Online)
+universalbank$CreditCard <- as.factor(universalbank$CreditCard)
+summary(universalbank)
+```
+
+
+```{r}
+
+library("caret")
+library('class')
+library('ISLR')
+
+```
+
+## Question A
+
+##partitioning the data into training (60%) and validation set(40%)
+
+```{r}
+set.seed(64060)
+Train_Index = createDataPartition(universalbank$personal.loan,p=0.6, list=FALSE) 
+
+Train.df=universalbank[Train_Index,]
+Validation.df=universalbank[-Train_Index,]
+```
+
+## a pivot table for the training data with Online as a column variable, CC as a rowvariable, and Loan as a secondary row variable.
+```{r}
+
+
+mytable <- xtabs(~ Online+CreditCard+personal.loan, data =Train.df)
+
+ftable(mytable) 
+
+
+```
+## Question B
+
+
+# probability of customer accepting loan with the condition on having credit card and using online services = 59/59+479= 0.1096
+
+## Question C
+
+# pivot tables for the loan and online ,loan and creditcard
+
+```{r}
+
+table(Online=Train.df$Online, personal.loan=Train.df$personal.loan)
+
+table(CreditCard=Train.df$CreditCard, personal.loan=Train.df$personal.loan)
+
+
+```
+
+## question D
+
+# P(CC = 1 | Loan = 1) = 93/93+195 = 0.3229166
+# P(Online = 1 | Loan = 1)  = 179/179+109 =0.6215277
+# P(Loan = 1) = 109+179/179+109+1631+1081=0.096
+# P(CC = 1 | Loan = 0)  =788/788+1924=0.2905604
+# P(Online = 1 | Loan = 0)=1631/1631+1081=0.6014011
+# P(Loan = 0)=1924+788/1924+788+195+93=0.904  
+
+## Question E
+
+## naive Bayes probability P(Loan = 1 | CC = 1, Online = 1).
+
+# naive bayes formula p(Y/x1,....xn) = p(x1,x2,...xn)/y*p(y)/p(x1,x2,...xn)
+# y=loan1
+# x1= creditcard1
+# x2= online1
+# p(creditcard1(x1))=788+93/788+93+1924+195=0.29366
+# p(online1(x2)) = 1631+179/1631+179+1081+109 = 0.6033
+# p(loan1/creditcard1,online1)= p(creditcard1/loan1)*p(online1/loan1)*p(loan)
+##                                /p(creditcard1)*p(online1)
+
+                        = 0.3229166*0.6215277*0.096/0.29366*0.6033
+
+
+                        = 0.1087
+
+
+
+## Question F
+
+## value obtained in pivot table is 0.1096 and naive bayes probabilty is 0.1087. both values are merely same but the most accurate estimate is table value because of the assumption that we made in naive bayes as variables are independent.
+
+
+## Question G
+
+# entries for computing g P(Loan = 1 | CC = 1, Online = 1)
+```{r}
+
+library(e1071)
+
+nb.model<-naiveBayes (personal.loan~Online+CreditCard, data=Train.df)
+To_Predict=data.frame(Online='1', CreditCard='1')
+predict(nb.model,To_Predict,type='raw')
+```
+
+## Value obtained from naive bias formula (from question E) and the value obtained from computing naive bias by entry are same.
+
+
+
+

@@ -1,0 +1,76 @@
+---
+title: "Assignment_4"
+author: "Akhila Sri"
+date: '2022-03-20'
+output:
+  word_document: default
+  pdf_document: default
+---
+
+
+
+```{r}
+
+library(readr)
+
+Pharmaceuticals <- read_csv("C:/Users/akhila/OneDrive/Desktop/Pharmaceuticals.csv")
+View(Pharmaceuticals)
+head(Pharmaceuticals)
+```
+
+```{r}
+df <- Pharmaceuticals [,3:11]
+head(df)
+```
+
+```{r}
+library(cluster)
+library(ggplot2)
+library(gridExtra)
+
+df_Scaling <- scale (df)
+head(df_Scaling)
+
+```
+
+
+
+
+```{r}
+clusters <- (nrow(df_Scaling)-1)*sum(apply(df_Scaling,2,var))
+clusters
+```
+
+```{r}
+for (i in 2:15) clusters[i] <- sum(kmeans(df_Scaling,centers=i)$withinss)
+clusters
+```
+
+## Cluster Analysis
+
+
+```{r}
+
+Cluster_5 <- kmeans(df_Scaling, 5)
+aggregate(df_Scaling,by=list(Cluster_5$cluster),FUN=mean)
+
+df_2 <- data.frame(df_Scaling, Cluster_5$cluster)
+df_2
+```
+
+
+
+## Graph 
+
+```{r}
+plot(1:15, clusters, type="b", xlab="Number of Clusters",ylab="Within groups sum of squares")
+```
+
+
+
+
+```{r}
+library(cluster)
+clusplot(df_2, Cluster_5$cluster, color=TRUE, shade=FALSE, labels=2, lines=0)
+
+```

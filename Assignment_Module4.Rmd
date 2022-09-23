@@ -1,0 +1,161 @@
+---
+title: "Assignment_1"
+author: "Akhila SriMedarametla"
+date: "23/09/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+### Problem 
+
+
+**a. Define the decision variables**
+
+The decision variables  = Number of units of the new product produced on each plant(regardless of its size) 
+
+
+  $X_i$ = means the number of units produced on each plant, where $i$= 1 (Plant 1), 2 (Plant 2), and 3 (Plant 
+3).
+
+    L, M, and S = means the product's size, where L = large, M = medium, and S = small.
+
+    $X_iL$ = number of large items produced on plant $i$, where $i$= 1 (Plant 1), 2 (Plant 2), and 3 (Plant 3).
+
+    $X_iM$ = number of medium items produced on plant $i$, where $i$= 1 (Plant 1), 2 (Plant 2), and 3 (Plant 3).
+
+    $X_iS$ = number of small items produced on plant $i$, where $i$= 1 (Plant 1), 2 (Plant 2), and 3 (Plant 3).
+
+
+
+**b. Formulate a linear programming model for this problem.**
+
+Let 
+
+    $X_iL$ = number of large items produced on plant $i$, where $i$= 1 (Plant 1), 2 (Plant 2), and 3 (Plant 3).
+
+    $X_iM$ = number of medium items produced on plant $i$, where $i$= 1 (Plant 1), 2 (Plant 2), and 3 (Plant 3).
+
+    $X_iS$ = number of small items produced on on plant $i$, where $i$= 1 (Plant 1), 2 (Plant 2), and 3 (Plant 3).
+
+
+Maximize profit 
+
+    $Z= 420 \ (X_1L + X_2L + X_3L) + 360 \ (X_1M + X_2M + X_3M) + 300 / (X_1S + X_2S + X_3S)$
+
+
+Constraints:
+
+  Total number of size’s units produced regardless the plant:
+
+    $L = X_1L + X_2L + X_3L$
+
+    $M = X_1M + X_2M + X_3M$
+
+    $S = X_1S + X_2S + X_3S$
+
+  Production capacity per unit by plant each day:
+
+    Plant 1 = $X_1L + X_1M + X_1S \ 750$
+
+    Plant 2 = $X_2L + X_2M + X_2S \ 900$
+
+    Plant 3 = $X_3L + X_3M + X_3S \ 450$
+
+  Storage capacity per unit by plant each day:
+
+    Plant 1 = $20 X_1L + 15 X_1M + 12 X_1S \13000$
+
+    Plant 2 = $20 X_2L + 15 X_2M + 12 X_2S \ 12000$
+
+    Plant 3 = $20 X_3L + 15 X_3M + 12 X_3S \ 5000$
+
+  Sales forecast per day:
+
+    $L = X_1L + X_2L + X_3L \ 900$
+
+    $M = X_1M + X_2M + X_3M \ 1200$
+
+    $S = X_1S + X_2S + X_3S \ 750$
+
+  The plants should use the same percentage of their excess capacity to produce the new product. 
+
+
+    $\dfrac {X_1L + X_1M + X_1S} {750}$ = $\dfrac {X_2L + X_2M + X_2S} {900}$ = $\dfrac {X_3L + X_3M + X_3S} {450}$
+
+
+      It can be simplified as:
+
+          a) $900 (X_1L + X_1M + X_1S) - 750 (X_2L + X_2M + X_2S) = 0$
+
+          b) $450 (X_2L + X_2M + X_2S) - 900 (X_3L + X_3M + X_3S) = 0$
+
+          c) $450 (X_1L + X_1M + X_1S) - 750 (X_3L + X_3M + X_3S) = 0$
+
+  All values must be greater or equal to zero
+
+    $L, M,$ and $S \ 0$
+
+    $X_iL, X_iM,$ and $X_iS \ 0$
+
+
+```{r}
+# Import the lpSolve package. 
+library(lpSolve)
+# Set coefficients for objective function.
+my_obfunct <- c(420, 420, 420,
+                360, 360, 360,
+                300, 300, 300)
+# Set the left hand side of the problem's constraints.
+my_lefconst <- matrix(c(1, 1,1 ,0, 0, 0,0, 0, 0,
+                        0,0, 0,1, 1, 1, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 1, 1, 1,
+                        20, 15, 12, 0, 0, 0, 0, 0,0,
+                        0, 0, 0, 20, 15, 12, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 20, 15, 12,
+                        1, 0, 0, 1, 0, 0, 1, 0, 0,
+                        0, 1, 0, 0, 1, 0, 0, 1, 0,
+                        0, 0, 1, 0, 0, 1, 0, 0, 1,
+                        900, 900, 900, -750, -750, -750, 0, 0, 0,
+                        0, 0, 0, 450, 450, 450, -900, -900, -900,
+                        450, 450, 450, 0, 0, 0, -750, -750, -750), nrow = 12, byrow = TRUE)
+
+# Set the right hand side of the problem's constraints.
+my_rigconst <- c(750,
+                 900,
+                 450,
+                 13000,
+                 12000,
+                 5000,
+                 900,
+                 1200,
+                 750,
+                 0,
+                 0,
+                 0)
+# Set the unequality signs
+my_signs <- c("<=",
+              "<=",
+              "<=",
+              "<=",
+              "<=",
+              "<=",
+              "<=",
+              "<=",
+              "<=",
+              "=",
+              "=",
+              "=")
+# Set up the final lp problem
+
+lp("max", my_obfunct, my_lefconst, my_signs, my_rigconst)
+# To get the soluction of the lp problem
+lp("max", my_obfunct, my_lefconst, my_signs, my_rigconst)$solution
+```
+
+
+
